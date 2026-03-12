@@ -3,9 +3,9 @@
 #include <sstream>
 #include <vector>
 #include "../include/Lexer.h"
-// Comment these out for now if you haven't created the header files yet!
-// #include "../include/Parser.h" 
+#include "../include/Parser.h" 
 // #include "../include/Generator.h"
+
 
 // helper function to make our enum class printable
 std::string tokenTypeToString(TokenType type) {
@@ -21,6 +21,21 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::PrintPosition:    return "?";
         case TokenType::EndOfFile:        return "EOF";
         default:                          return "UNKNOWN";
+    }
+}
+
+// Helper function to print the AST recursively with indentation
+void printAST(const std::vector<Instruction>& program, int depth = 0) {
+    std::string indent(depth * 2, ' '); // 2 spaces per depth level
+
+    for (const auto& instr : program) {
+        std::cout << indent << tokenTypeToString(instr.type) << "\n";
+        
+        // If it's a loop, recursively print its body with increased indentation
+        if (instr.type == TokenType::LoopStart) {
+            printAST(instr.loopBody, depth + 1);
+            std::cout << indent << "]\n"; // Print the closing bracket for visual clarity
+        }
     }
 }
 
@@ -53,6 +68,24 @@ int main(int argc, char* argv[]) {
                   << " | Col: " << token.column << "\n";
     }
     std::cout << "--------------------\n";
+    
+
+    // 4. Pass tokens to Parser
+    std::cout << "\n--- Parser Output (AST) ---\n";
+    try {
+        Parser parser(tokens);
+        std::vector<Instruction> ast = parser.parse();
+        
+        // Print the tree!
+        printAST(ast);
+        
+    } catch (const std::runtime_error& e) {
+        // Catch those unmatched bracket errors we just wrote
+        std::cerr << "\nCompilation Failed!\n" << e.what() << "\n";
+        return 1;
+    }
+    std::cout << "---------------------------\n";
 
     return 0;
 }
+
