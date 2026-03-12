@@ -1,3 +1,4 @@
+// Lexer.cpp
 #include "../include/Lexer.h"
 
 // Constructor: Initializes the lexer with the source code string
@@ -7,18 +8,23 @@ Lexer::Lexer(std::string_view sourceCode)
 
 // Helper: Checks if we've reached the end of the file
 bool Lexer::isAtEnd() const {
-    // TODO: Return true if m_position is greater than or equal to the length of m_source
-    return false; 
+    // Return true if m_position is greater than or equal to the length of m_source
+    return this->m_position >= this->m_source.length();
 }
 
 // Helper: Consumes the current character and moves to the next one
 char Lexer::advance() {
-    // TODO: 
     // 1. Get the character at m_position
+    char c = this->m_source[m_position];
+
     // 2. Increment m_position
+    this->m_position += 1;
+
     // 3. Increment m_column
+    this->m_column += 1;
+
     // 4. Return the character
-    return '\0'; 
+    return c; 
 }
 
 // Main logic: Converts the whole string into a vector of tokens
@@ -32,18 +38,43 @@ std::vector<Token> Lexer::tokenize() {
 
         char c = advance();
 
-        // TODO: Implement the logic to categorize 'c'
-        // Hint: A switch statement works perfectly here.
-        // case '>': 
-        //     tokens.push_back({TokenType::IncrementPointer, startLine, startColumn});
-        //     break;
-        // ... and so on for <, +, -, ., ,, [, ]
+        // Implement the logic to categorize 'c'
+        switch (c) {
+            case '>':
+                tokens.push_back({TokenType::IncrementPointer, startLine, startColumn});
+                break;
+            case '<':
+                tokens.push_back({TokenType::DecrementPointer, startLine, startColumn});
+                break;
+            case '+':
+                tokens.push_back({TokenType::IncrementValue, startLine, startColumn});
+                break;
+            case '-':
+                tokens.push_back({TokenType::DecrementValue, startLine, startColumn});
+                break;
+            case '.':
+                tokens.push_back({TokenType::Output, startLine, startColumn});
+                break;
+            case ',':
+                tokens.push_back({TokenType::Input, startLine, startColumn});
+                break;
+            case '[':
+                tokens.push_back({TokenType::LoopStart, startLine, startColumn});
+                break;
+            case ']':
+                tokens.push_back({TokenType::LoopEnd, startLine, startColumn});
+                break;
+        }
 
-        // TODO: Handle your custom '?' command here too!
+        // TODO (i want to wait for on this for later as i just want a nomal bf compiler) : Handle your custom '?' command here too! 
 
-        // TODO: Handle Newlines ('\n')
+        // Handle Newlines ('\n')
         // If the character is a newline, you need to increment m_line and reset m_column to 1.
-        
+        if (c == '\n') {
+            this->m_line += 1;
+            this->m_column = 1;
+        }
+
         // Note: For any other character (spaces, letters, etc.), you do nothing! 
         // Brainfuck treats unrecognized characters as comments, so just let the loop continue.
     }
