@@ -1,0 +1,55 @@
+#include "../include/Lexer.h"
+
+// Constructor: Initializes the lexer with the source code string
+Lexer::Lexer(std::string_view sourceCode) 
+    : m_source(sourceCode), m_position(0), m_line(1), m_column(1) {
+}
+
+// Helper: Checks if we've reached the end of the file
+bool Lexer::isAtEnd() const {
+    // TODO: Return true if m_position is greater than or equal to the length of m_source
+    return false; 
+}
+
+// Helper: Consumes the current character and moves to the next one
+char Lexer::advance() {
+    // TODO: 
+    // 1. Get the character at m_position
+    // 2. Increment m_position
+    // 3. Increment m_column
+    // 4. Return the character
+    return '\0'; 
+}
+
+// Main logic: Converts the whole string into a vector of tokens
+std::vector<Token> Lexer::tokenize() {
+    std::vector<Token> tokens;
+
+    while (!isAtEnd()) {
+        // Grab the starting column/line for the current token before we advance
+        int startColumn = m_column;
+        int startLine = m_line;
+
+        char c = advance();
+
+        // TODO: Implement the logic to categorize 'c'
+        // Hint: A switch statement works perfectly here.
+        // case '>': 
+        //     tokens.push_back({TokenType::IncrementPointer, startLine, startColumn});
+        //     break;
+        // ... and so on for <, +, -, ., ,, [, ]
+
+        // TODO: Handle your custom '?' command here too!
+
+        // TODO: Handle Newlines ('\n')
+        // If the character is a newline, you need to increment m_line and reset m_column to 1.
+        
+        // Note: For any other character (spaces, letters, etc.), you do nothing! 
+        // Brainfuck treats unrecognized characters as comments, so just let the loop continue.
+    }
+
+    // Always good practice to append an EndOfFile token at the very end
+    tokens.push_back({TokenType::EndOfFile, m_line, m_column});
+    
+    return tokens;
+}
