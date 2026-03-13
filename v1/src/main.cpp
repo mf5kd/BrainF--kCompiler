@@ -5,20 +5,62 @@
 #include <vector>
 #include <cstdlib>
 #include <filesystem>
+#include <algorithm>
 #include "../include/Lexer.h"
 #include "../include/Parser.h" 
 #include "../include/Generator.h"
 
+// Helper function to trim whitespace and handle carriage returns (Windows line endings)
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    if (std::string::npos == first) return "";
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input.bf>\n";
+        std::cerr << "Usage: " << argv[0] << " <config_file.txt>\n";
+        std::cerr << "Config file format:\n";
+        std::cerr << "  Line 1: Path to .bf file\n";
+        std::cerr << "  Line 2: true/false (run after compilation)\n";
+        std::cerr << "  Line 3: Output executable name\n";
         return 1;
     }
 
-    // 1. Read file safely into a string
-    std::ifstream file(argv[1]);
+    // 1. Read the configuration file
+    std::ifstream configFile(argv[1]);
+    if (!configFile.is_open()) {
+        std::cerr << "Error: Could not open config file " << argv[1] << "\n";
+        return 1;
+    }
+
+    std::string bfFilePath, runFlagStr, programName;
+
+    if (!std::getline(configFile, bfFilePath) ||
+        !std::getline(configFile, runFlagStr) ||
+        !std::getline(configFile, programName)) {
+        std::cerr << "Error: Config file is missing required lines.\n";
+        return 1;
+    }
+
+    // Clean up the parsed strings (removes \r if edited on Windows)
+    bfFilePath = trim(bfFilePath);
+    runFlagStr = trim(runFlagStr);
+    programName = trim(programName);
+
+    // Convert string to lower case for easy boolean checking
+    std::transform(runFlagStr.begin(), runFlagStr.end(), runFlagStr.begin(), ::tolower);
+    bool runAfterCompile = (runFlagStr == "true" || runFlagStr == "1");
+
+    if (programName.empty()) {
+        programName = "Program";
+    }
+
+    // 2. Read the Brainfuck file safely into a string
+    std::ifstream file(bfFilePath);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file " << argv[1] << "\n";
+        std::cerr << "Error: Could not open Brainfuck source file " << bfFilePath << "\n";
         return 1;
     }
     
@@ -26,13 +68,13 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string sourceCode = buffer.str();
 
-    // 2. Pass to Lexer
+    // 3. Pass to Lexer
     Lexer lexer(sourceCode);
     std::vector<Token> tokens = lexer.tokenize();
     
     std::vector<Instruction> ast;
 
-    // 3. Pass tokens to Parser
+    // 4. Pass tokens to Parser
     try {
         Parser parser(tokens);
         ast = parser.parse();
@@ -42,11 +84,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 4. Pass AST to Generator
+    // 5. Pass AST to Generator
     Generator generator(ast);
     std::string cCode = generator.generate();
 
-    // 5. Write the generated C code to a file
+    // 6. Write the generated C code to a file
     std::string outputFilename = "output.c";
     std::ofstream outFile(outputFilename);
     if (!outFile.is_open()) {
@@ -56,22 +98,11 @@ int main(int argc, char* argv[]) {
     
     outFile << cCode;
     outFile.close();
-    
-    std::string programName;
-    std::string outputCommand;
-    std::cout << "Enter Name of Program (or press Enter for default name = 'Program'):";
-    std::getline(std::cin, programName);
-    std::cout << std::endl;
 
-    if (programName.empty()) {
-        programName = "Program";
-    }
-
-    outputCommand = "gcc output.c -o output/" + programName;
     std::filesystem::create_directories("output");
+    std::string outputCommand = "gcc output.c -o output/" + programName;
 
-
-    // 6. Compile the C code using GCC (Linux Debian)
+    // 7. Compile the C code using GCC
     std::cout << "Compiling " << outputFilename << " with gcc...\n";
     
     // Execute the gcc command in the shell    
@@ -79,13 +110,17 @@ int main(int argc, char* argv[]) {
     
     // Check if compilation was successful (system returns 0 on success)
     if (result == 0) {
-        std::cout << "Successfully compiled! You can run it with: ./output/" + programName + "\n" << programName + " output: \n";
         std::system("rm output.c");
-        std::system(("./output/" + programName).c_str());
+        std::cout << "Successfully compiled! You can run it with: ./output/" << programName << "\n";
+        
+        if (runAfterCompile) {
+            std::cout << "Running " << programName << "...\n";
+            std::system(("./output/" + programName).c_str());
+            
+        }
     } else {
         std::cerr << "Error: GCC compilation failed. Make sure gcc is installed.\n";
         std::system("rm output.c");
-
         return 1;
     }
 
