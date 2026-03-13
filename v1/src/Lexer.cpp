@@ -64,9 +64,9 @@ std::vector<Token> Lexer::tokenize() {
             case ']':
                 tokens.push_back({TokenType::LoopEnd, startLine, startColumn});
                 break;
+            case '?':
+                tokens.push_back({TokenType::PrintPosition, startLine, startColumn});
         }
-
-        // TODO (i want to wait for on this for later as i just want a nomal bf compiler) : Handle your custom '?' command here too! 
 
         // Handle Newlines ('\n')
         // If the character is a newline, you need to increment m_line and reset m_column to 1.
