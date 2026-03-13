@@ -79,10 +79,13 @@ int main(int argc, char* argv[]) {
     
     // Check if compilation was successful (system returns 0 on success)
     if (result == 0) {
-        std::cout << "Successfully compiled! You can run it with: ./bf_program\n";
+        std::cout << "Successfully compiled! You can run it with: ./output/" + programName + "\n" << programName + " output: \n";
         std::system("rm output.c");
+        std::system(("./output/" + programName).c_str());
     } else {
         std::cerr << "Error: GCC compilation failed. Make sure gcc is installed.\n";
+        std::system("rm output.c");
+
         return 1;
     }
 
