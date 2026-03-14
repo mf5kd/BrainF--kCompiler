@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -Wall -std=c++17 -Iinclude
 # Leave LIBS empty for standard C++ projects
 LIBS = 
-TARGET = brainfuck
+TARGET = bf
 
 SRC_DIR = src
 OBJ_DIR = obj
