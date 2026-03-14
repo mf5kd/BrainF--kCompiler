@@ -66,6 +66,13 @@ std::vector<Token> Lexer::tokenize() {
                 break;
             case '?':
                 tokens.push_back({TokenType::PrintPosition, startLine, startColumn});
+                break;
+            case '\'':
+                tokens.push_back({TokenType::OutputAsNum, startLine, startColumn});
+                break;
+            case '"':
+                tokens.push_back({TokenType::InputAsNum, startLine, startColumn});
+                break;
         }
 
         // Handle Newlines ('\n')

@@ -59,6 +59,12 @@ void Generator::generateInstructions(const std::vector<Instruction>& instruction
             case TokenType::PrintPosition:
                 out << indent << R"(printf("%d", (int)(ptr - tape));)" << "\n";
                 break;
+            case TokenType::OutputAsNum:
+                out << indent << "printf(\"%d\", *ptr);\n";
+                break;
+            case TokenType::InputAsNum:
+                out << indent << "int temp; scanf(\"%d\", &temp); *ptr = temp;\n";
+                break;
             case TokenType::LoopStart:
                 out << indent << "while (*ptr) {\n";
 

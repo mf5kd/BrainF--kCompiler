@@ -14,7 +14,11 @@ enum class TokenType {
     Input,            // ,
     LoopStart,        // [
     LoopEnd,          // ]
-    PrintPosition,    // ? (Your future custom command)
+    PrintPosition,    // ?
+    OutputAsNum,      // '
+    InputAsNum,       // "  
+    SaveLoopTrigger,  // *  TODO
+    RunLoop,          // &  TODO
     EndOfFile
 };
 
