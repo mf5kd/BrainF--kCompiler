@@ -73,6 +73,12 @@ std::vector<Token> Lexer::tokenize() {
             case '"':
                 tokens.push_back({TokenType::InputAsNum, startLine, startColumn});
                 break;
+            case '*':
+                tokens.push_back({TokenType::SaveLoopTrigger, startLine, startColumn});
+                break;
+            case '&':
+                tokens.push_back({TokenType::RunLoop, startLine, startColumn});
+                break;
         }
 
         // Handle Newlines ('\n')

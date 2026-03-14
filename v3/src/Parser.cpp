@@ -1,4 +1,6 @@
 #include "../include/Parser.h"
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 // Constructor
@@ -35,8 +37,18 @@ std::vector<Instruction> Parser::parse() {
 
     while (!isAtEnd()) {
         Token token = advance();
+        
+        if (token.type == TokenType::SaveLoopTrigger) {
+            if (isAtEnd() || peek().type != TokenType::LoopStart) {
+                std::string errorMsg = "Syntax Error: Expected '[' after '*' at line " + std::to_string(token.line) + ", column " + std::to_string(token.column);
+                throw std::runtime_error(errorMsg);
+            }
+            
+            advance(); 
+            std::vector<Instruction> savedLoopBody = parseLoop();
+            program.push_back({TokenType::SaveLoopTrigger, savedLoopBody});
 
-        if (token.type == TokenType::LoopStart) {
+        } else if (token.type == TokenType::LoopStart) {
             // We hit a '['! 
             // 1. Call parseLoop() to gather everything inside this loop.
             std::vector<Instruction> pl = parseLoop();
@@ -69,8 +81,19 @@ std::vector<Instruction> Parser::parseLoop() {
     // Keep going until we hit the end of the file OR we peek a ']'
     while (!isAtEnd() && peek().type != TokenType::LoopEnd) {
         Token token = advance();
+
+        if (token.type == TokenType::SaveLoopTrigger) {
+            // Check for the mandatory '[' after '*'
+            if (isAtEnd() || peek().type != TokenType::LoopStart) {
+                std::string errorMsg = "Syntax Error: Expected '[' after '*' inside loop at line " + std::to_string(token.line) + ", column " + std::to_string(token.column);
+                throw std::runtime_error(errorMsg);
+            }
+
+            advance(); // Consume the '['
+            std::vector<Instruction> savedLoopBody = parseLoop(); // Recursively parse the body
+            loopBody.push_back({TokenType::SaveLoopTrigger, savedLoopBody});
         
-        if (token.type == TokenType::LoopStart) {
+        } else if (token.type == TokenType::LoopStart) {
             // Brainfuck supports nested loops (loops inside loops)!
             // Recursively call parseLoop() here, just like you did in parse().
             std::vector<Instruction> pl = parseLoop();

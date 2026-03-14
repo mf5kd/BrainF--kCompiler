@@ -8,23 +8,28 @@ Generator::Generator(const std::vector<Instruction>& program)
 
 // Main generation logic
 std::string Generator::generate() {
-    std::stringstream out;
+    std::stringstream finalOut;
+    std::stringstream mainOut;
 
-    // a char array of size 30000 initialized to 0, and a char pointer.
-    out << "// Auto-generated Brainfuck to C compiler output\n";
-    // Add your C setup code to 'out' here
-    out << "#include <stdio.h>\n";
-    out << "int main() {\n";
-    out << "    char tape[30000] = {0};\n";
-    out << "    char *ptr = tape;\n";
+    finalOut << "// Auto-generated Brainfuck to C compiler output\n";
+    finalOut << "#include <stdio.h>\n\n";
+    finalOut << "char tape[30000] = {0};\n";
+    finalOut << "char *ptr = tape;\n\n";
+    
+    finalOut << "typedef void (*LoopFunc)(void);\n";
+    finalOut << "LoopFunc funcTape[256] = {NULL};\n\n";
 
-                
-    generateInstructions(m_program, out, 1);
+    mainOut << "int main() {\n";
 
-    out << R"(    printf("\n");)" << "\n";
-    out << "    return 0;\n}\n";
+    generateInstructions(m_program, mainOut, 1);
 
-    return out.str();
+    mainOut << "    printf(\"\\n\");\n";
+    mainOut << "    return 0;\n}\n";
+
+    finalOut << m_functionsOut.str() << "\n";
+    finalOut << mainOut.str();
+
+    return finalOut.str();
 }
 
 
@@ -73,11 +78,31 @@ void Generator::generateInstructions(const std::vector<Instruction>& instruction
 
                 out << indent << "}\n";
                 break;
+            case TokenType::SaveLoopTrigger: {
+                std::string funcName = "saved_loop_" + std::to_string(m_funcCounter++);
+
+                m_functionsOut << "void " << funcName << "() {\n";
+
+                generateInstructions(instr.loopBody, m_functionsOut, 1);
+
+                m_functionsOut << "}\n\n";
+
+                out << indent << "funcTape[(unsigned char)(*ptr)] = " << funcName << ";\n";
+                break;
+            }
+            case TokenType::RunLoop: {
+                out << indent << "if (funcTape[(unsigned char)(*ptr)] != NULL) {\n";
+                out << indent << "    funcTape[(unsigned char)(*ptr)]();\n";
+                out << indent << "}\n";
+                break;
             default:
                 break;
+           
+            }
         }
     }
 }
+
 
 // Helper to generate spaces for pretty C code
 std::string Generator::getIndent(int level) const {

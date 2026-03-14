@@ -19,6 +19,9 @@ private:
 
     // Recursive helper function to handle nested loops cleanly
     void generateInstructions(const std::vector<Instruction>& instructions, std::stringstream& out, int indentLevel);
+    
+    int m_funcCounter = 0;
+    std::stringstream m_functionsOut;
 
     // Helper to generate spaces so your output C code is nicely formatted!
     std::string getIndent(int level) const;

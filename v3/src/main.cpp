@@ -99,8 +99,8 @@ int main(int argc, char* argv[]) {
     outFile << cCode;
     outFile.close();
 
-    std::filesystem::create_directories("output");
-    std::string outputCommand = "gcc output.c -o output/" + programName;
+    //std::filesystem::create_directories("REMOVE");
+    std::string outputCommand = "gcc output.c -o " + programName;
 
     // 7. Compile the C code using GCC
     std::cout << "Compiling " << outputFilename << " with gcc...\n";
@@ -111,11 +111,11 @@ int main(int argc, char* argv[]) {
     // Check if compilation was successful (system returns 0 on success)
     if (result == 0) {
         std::system("rm output.c");
-        std::cout << "Successfully compiled! You can run it with: ./output/" << programName << "\n";
+        std::cout << "Successfully compiled! You can run it with: ./" << programName << "\n";
         
         if (runAfterCompile) {
             std::cout << "Running " << programName << "...\n";
-            std::system(("./output/" + programName).c_str());
+            std::system(("./" + programName).c_str());
             
         }
     } else {
