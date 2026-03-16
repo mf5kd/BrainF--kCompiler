@@ -95,10 +95,10 @@ void Generator::generateInstructions(const std::vector<Instruction>& instruction
                 out << indent << "    funcTape[(unsigned char)(*ptr)]();\n";
                 out << indent << "}\n";
                 break;
+            }
             default:
                 break;
            
-            }
         }
     }
 }
