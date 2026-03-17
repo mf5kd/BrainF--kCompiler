@@ -62,7 +62,7 @@ void Generator::generateInstructions(const std::vector<Instruction>& instruction
                 out << indent << "*ptr = getchar();\n";
                 break;
             case TokenType::PrintPosition:
-                out << indent << R"(printf("%d", (int)(ptr - tape));)" << "\n";
+                out << indent << R"(printf("[%d]", (int)(ptr - tape));)" << "\n";
                 break;
             case TokenType::OutputAsNum:
                 out << indent << "printf(\"%d\", *ptr);\n";

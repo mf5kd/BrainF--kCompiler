@@ -104,7 +104,7 @@ int main() {
     ptr++;
     putchar(*ptr);
     ptr--;
-    printf("%d", (int)(ptr - tape));
+    printf("[%d]", (int)(ptr - tape));
     ptr++;
     ptr++;
     ptr++;
